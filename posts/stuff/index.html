@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Kaluchua</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="/theme/css/main.css" type="text/css" />
+        <link href="/" type="application/atom+xml" rel="alternate" title="Kaluchua ATOM Feed" />
+
+        <!--[if IE]>
+                <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+        <!--[if lte IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="/css/ie.css"/>
+                <script src="/js/IE8.js" type="text/javascript"></script><![endif]-->
+
+        <!--[if lt IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="/css/ie6.css"/><![endif]-->
+                <link rel="icon" type="image/png" href="favi.png">
+
+</head>
+
+<body>
+<header>
+    <h1><a href="" id="site-title"></a> :
+        <a href="/posts/stuff/" id="page-title">Custom ordering stuff</a></h1>
+</header>
+<article>
+    <p>Try to define a custom data type and a specified order on it.
+I propose you something like this,</p>
+<div class="highlight"><pre><span class="kr">data</span> <span class="kt">MPair</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">MPair</span> <span class="n">a</span> <span class="n">a</span> <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
+
+<span class="c1">-- some helper to test</span>
+<span class="nf">toTuple</span> <span class="p">(</span><span class="kt">MPair</span> <span class="n">x</span> <span class="n">y</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="nf">fromX</span> <span class="n">x</span> <span class="ow">=</span> <span class="kt">MPair</span> <span class="n">x</span> <span class="n">x</span>
+
+<span class="kr">instance</span> <span class="p">(</span><span class="kt">Eq</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Eq</span> <span class="p">(</span><span class="kt">MPair</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+    <span class="p">(</span><span class="kt">MPair</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="kt">MPair</span> <span class="n">c</span> <span class="n">d</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">b</span> <span class="o">==</span> <span class="n">d</span><span class="p">)</span>
+
+<span class="c1">-- This is not exactly the ordering you are looking for</span>
+<span class="c1">-- But at this stage it should no be a pain to define</span>
+<span class="c1">-- the required ordering, you just have to implement it below</span>
+<span class="kr">instance</span> <span class="p">(</span><span class="kt">Ord</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Ord</span> <span class="p">(</span><span class="kt">MPair</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+    <span class="n">compare</span> <span class="n">p</span><span class="o">@</span><span class="p">(</span><span class="kt">MPair</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="n">q</span><span class="o">@</span><span class="p">(</span><span class="kt">MPair</span> <span class="n">c</span> <span class="n">d</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">p</span> <span class="o">==</span> <span class="n">q</span> <span class="ow">=</span> <span class="kt">EQ</span>
+            <span class="o">|</span> <span class="n">otherwise</span> <span class="ow">=</span> <span class="kr">case</span> <span class="p">(</span><span class="n">compare</span> <span class="n">a</span> <span class="n">c</span><span class="p">,</span> <span class="n">compare</span> <span class="n">b</span> <span class="n">d</span><span class="p">)</span> <span class="kr">of</span>
+                            <span class="p">(</span><span class="kt">LT</span><span class="p">,</span> <span class="kr">_</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">LT</span>
+                            <span class="p">(</span><span class="kr">_</span><span class="p">,</span> <span class="kt">LT</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">LT</span>
+                            <span class="kr">_</span>       <span class="ow">-&gt;</span> <span class="kt">GT</span>
+
+<span class="c1">-- convert a list of tuple to a list or MPair.</span>
+<span class="nf">fromListToMPair</span> <span class="ow">::</span> <span class="p">[(</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">)]</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="kt">MPair</span> <span class="n">a</span><span class="p">]</span>
+<span class="nf">fromListToMPair</span> <span class="kt">[]</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">fromListToMPair</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span><span class="kt">:</span><span class="n">xs</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="kt">MPair</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="kt">:</span> <span class="n">fromListToMPair</span> <span class="n">xs</span>
+
+<span class="c1">-- the inverse of the previous one</span>
+<span class="nf">fromMPairToList</span> <span class="ow">::</span> <span class="p">[</span><span class="kt">MPair</span> <span class="n">a</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="p">[(</span><span class="n">a</span><span class="p">,</span><span class="n">a</span><span class="p">)]</span>
+<span class="nf">fromMPairToList</span> <span class="kt">[]</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">fromMPairToList</span> <span class="p">((</span><span class="kt">MPair</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span><span class="kt">:</span><span class="n">xs</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="kt">:</span> <span class="n">fromMPairToList</span> <span class="n">xs</span>
+
+<span class="c1">-- A test case</span>
+<span class="nf">testList</span> <span class="ow">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
+</pre></div>
+
+
+<p>Go to ghci and test it,</p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">fromMPairToList</span> <span class="err">$</span> <span class="n">sort</span> <span class="err">$</span> <span class="n">fromListToMPair</span> <span class="n">testList</span>
+<span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
+<span class="o">--</span> <span class="n">add</span> <span class="n">a</span> <span class="n">test</span> <span class="n">to</span> <span class="n">check</span> <span class="n">the</span> <span class="n">stability</span> <span class="n">of</span> <span class="n">your</span> <span class="n">order</span><span class="p">.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fromMPairToList</span> <span class="err">$</span> <span class="n">sort</span> <span class="err">$</span> <span class="n">sort</span> <span class="err">$</span> <span class="n">fromListToMPair</span> <span class="n">testList</span>
+<span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
+<span class="o">--</span> <span class="n">ok</span> <span class="n">this</span> <span class="n">is</span> <span class="n">stable</span>
+</pre></div>
+
+
+<p>This doesn't satisfied your requirement but, it's another way that I'd like to illustrate.
+In fact I've implemented the classical rule for sorting a list of tuple.
+Now i'll try to define your "ordering" , then I will redefine the Ord instance for MPair. like so,</p>
+<div class="highlight"><pre><span class="kr">instance</span> <span class="p">(</span><span class="kt">Ord</span> <span class="n">a</span><span class="p">,</span> <span class="kt">Num</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Ord</span> <span class="p">(</span><span class="kt">MPair</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+    <span class="n">compare</span> <span class="n">p</span><span class="o">@</span><span class="p">(</span><span class="kt">MPair</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="n">q</span><span class="o">@</span><span class="p">(</span><span class="kt">MPair</span> <span class="n">c</span> <span class="n">d</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">p</span> <span class="o">==</span> <span class="n">q</span>        <span class="ow">=</span> <span class="kt">EQ</span>
+            <span class="o">|</span> <span class="n">check</span> <span class="n">a</span> <span class="n">b</span> <span class="n">c</span> <span class="n">d</span> <span class="ow">=</span> <span class="kt">LT</span>
+            <span class="o">|</span> <span class="n">otherwise</span>     <span class="ow">=</span> <span class="kt">GT</span>
+                <span class="kr">where</span>
+                  <span class="n">pred</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="p">(</span><span class="n">abs</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span>
+                  <span class="n">check</span> <span class="n">a</span> <span class="n">b</span> <span class="n">c</span> <span class="n">d</span> <span class="ow">=</span> <span class="n">pred</span> <span class="n">a</span> <span class="n">c</span> <span class="o">&amp;&amp;</span> <span class="n">pred</span> <span class="n">b</span> <span class="n">d</span>
+</pre></div>
+
+
+<p>Then when I redo the test into ghci,</p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">fromMPairToList</span> <span class="err">$</span> <span class="n">sort</span> <span class="err">$</span> <span class="n">fromListToMPair</span> <span class="n">testList</span>
+<span class="p">[(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fromMPairToList</span> <span class="err">$</span> <span class="n">sort</span> <span class="err">$</span> <span class="n">sort</span> <span class="err">$</span> <span class="n">fromListToMPair</span> <span class="n">testList</span>
+<span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
+<span class="o">--</span> <span class="n">no</span> <span class="n">this</span> <span class="n">won</span><span class="err">&#39;</span><span class="n">t</span> <span class="n">work</span><span class="p">,</span> <span class="n">this</span> <span class="n">is</span> <span class="n">not</span> <span class="n">an</span> <span class="n">ordering</span><span class="p">,</span> <span class="n">you</span> <span class="n">cannot</span> <span class="n">sort</span><span class="p">.</span>
+</pre></div>
+
+
+<p>I realize that the stability of your order is not satisfied, then sorting is not what you need.</p>
+<p>Finally, I'd like to say it doesn't make sense as you criterion do no define an order upon your list of tuple. Your criterion is a discriminant, it will allow you to create two subgroup of data. ([criterion x is True], [criterion x is not True]). Sort your list of tuple as usual, and define a specify function (based on your criterion) which will create two distinct group.</p>
+<p>PS : Maybe you can build an order on your data using a function based on your criterion, but I don't see how to achieve it.</p>
+</article>
+
+        <footer>
+            <nav>
+                <ul>
+                    <li><a href="/tags.html">Tags</a></li>
+                </ul>
+            </nav>
+                <p id="theme-credit"><a href="http://mathieu.agopian.info/mnmlist/theme.html">Thème mnmlist</a></p>
+        </footer>
+
+</body>
+</html>
